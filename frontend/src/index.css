@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: 'Poppins', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* ── Education / Government palette ── */
+  /* Navy core */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-sidebar: #0b1a38;
+  --color-sidebar-light: #122044;
+
+  /* Accent */
+  --color-accent: #ef4444;
+  --color-accent-green: #059669;
+  --color-accent-amber: #d97706;
+
+  /* Semantic */
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --color-success: #059669;
+
+  /* Surfaces — clean white / soft blue */
+  --color-surface: #f0f4f8;
+  --color-card: #ffffff;
+  --color-fg: #0f1d3d;
+  --color-muted: #5b6b82;
+  --color-border: #d5dde8;
+}
+
+@layer base {
+  html { font-family: 'Inter', system-ui, sans-serif; }
+  .dark {
+    --color-surface: #0b1222;
+    --color-card: #111d32;
+    --color-fg: #e2e8f0;
+    --color-muted: #8899ad;
+    --color-border: #1e3050;
+  }
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #b0bfcf; border-radius: 4px; }
+.dark ::-webkit-scrollbar-thumb { background: #2a3f5a; }
+*:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: 6px; }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton { background: linear-gradient(90deg, #d5dde8 25%, #f0f4f8 50%, #d5dde8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+.dark .skeleton { background: linear-gradient(90deg, #111d32 25%, #1e3050 50%, #111d32 75%); background-size: 200% 100%; }
