@@ -50,7 +50,7 @@ function AppContent() {
         <Route path="/forms" element={<Forms user={user} />} />
         {user.role === 'admin' && <Route path="/forms/new" element={<FormBuilder />} />}
         {user.role === 'admin' && <Route path="/forms/:id/builder" element={<FormBuilder />} />}
-        <Route path="/fill/:id" element={<FormFill />} />
+        <Route path="/fill/:id" element={<FormFill user={user} />} />
         <Route path="/forms/view" element={<FormView user={user} />} />
         <Route path="/submissions" element={<Submissions user={user} />} />
         <Route path="/reviews" element={<ReviewSystem user={user} />} />
