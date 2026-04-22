@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 
+import { User } from '../lib/auth';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 type FieldType = 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date' | 'dropdown' | 'radio' | 'checkbox' | 'file' | 'mcq';
 
@@ -49,7 +51,7 @@ function Badge({ tone = 'blue', children }: { tone?: 'blue' | 'green' | 'amber' 
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function FormFill() {
+export default function FormFill({ user }: { user: User }) {
   const { id } = useParams();
   const nav = useNavigate();
 
@@ -76,6 +78,14 @@ export default function FormFill() {
   // Load form
   useEffect(() => {
     if (!id) { setStep('error'); setError('No form specified'); return; }
+    
+    // School Functionaries should not be filling forms, they should be nominating
+    if (user.role === 'functionary') {
+      setStep('error');
+      setError('School Functionaries cannot fill out forms. Please use the "Nominate Teachers" button on the Forms page.');
+      return;
+    }
+
     Promise.all([
       api.get(`/forms?id=${id}`),
       api.get(`/submissions?form_id=${id}`)

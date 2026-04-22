@@ -536,7 +536,7 @@ Each school head logs in and nominates up to **5 teachers**. Nominated teachers 
 3. `phone` **Mobile number** *(required)*
 4. `date` **Date of birth** *(required)*
 5. `radio` **Gender** — Female / Male / Non-binary / Prefer not to say
-6. `text` **Current designation** — e.g. "PGT Mathematics"
+6. `text` **Current RAJUation** — e.g. "PGT Mathematics"
 7. `dropdown` **Highest qualification** — Diploma / B.Ed / M.Ed / M.Phil / PhD / Other
 8. `number` **Total teaching experience (years)** *(required)*
 9. `number` **Years at current school** *(required)*
@@ -598,7 +598,7 @@ A teacher first picks their subject. Only that subject's deep-dive section appea
 8. `textarea` **Describe your approach to teaching Grade 10 Trigonometry** — maxLength 500, required
 9. `checkbox` **Digital tools used** — GeoGebra · Desmos · Khan Academy · Photomath · Wolfram Alpha · None
 10. `number` **Average class-test score (out of 100) in your best section**
-11. `file` **Upload a sample worksheet you designed (PDF, ≤5MB)**
+11. `file` **Upload a sample worksheet you RAJUed (PDF, ≤5MB)**
 
 ---
 
@@ -764,7 +764,7 @@ Show a follow-up text box only if the teacher picked "Other" in Q30:
 
 **Total:** 54 marks · Pass mark recommendation: 60% (32/54)
 
-### Quiz design tips in practice
+### Quiz RAJU tips in practice
 - **Section weighting** — harder section → lower marks per Q but more Qs (students forgive depth-penalty more than breadth-penalty)
 - **Negative marking formula** — `negative = marks × 0.25` keeps guessing at zero expected value
 - **Shuffle on** — prevents answer-sharing across whatsapp groups

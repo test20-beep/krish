@@ -285,18 +285,25 @@ export default function Forms({ user }: { user: User }) {
 
                   {/* Actions */}
                   <div className="flex gap-2 mt-4">
-                    {canFill && (
-                      <button onClick={() => {
-                        if (user.role === 'functionary' && row.form_type === 'nomination') {
-                          navigate(`/nominations?form_id=${row.id}`);
-                        } else {
-                          navigate(`/fill/${row.id}`);
-                        }
-                      }}
+                    {canFill && user.role !== 'functionary' && (
+                      <button onClick={() => navigate(`/fill/${row.id}`)}
                         className="flex-1 py-2.5 bg-accent-green text-white rounded-xl text-sm font-bold hover:bg-accent-green-hover transition-colors flex items-center justify-center gap-2 min-h-[44px] shadow-sm">
-                        <Play size={14} /> {user.role === 'functionary' && row.form_type === 'nomination' ? 'Nominate Teachers' : 'Fill Form'}
+                        <Play size={14} /> Fill Form
                       </button>
                     )}
+                    {canFill && user.role === 'functionary' && row.form_type === 'nomination' && (
+                      <button onClick={() => navigate(`/nominations?form_id=${row.id}`)}
+                        className="flex-1 py-2.5 bg-accent-green text-white rounded-xl text-sm font-bold hover:bg-accent-green-hover transition-colors flex items-center justify-center gap-2 min-h-[44px] shadow-sm">
+                        <Play size={14} /> Nominate Teachers
+                      </button>
+                    )}
+                    {canFill && user.role === 'functionary' && row.form_type !== 'nomination' && (
+                      <button onClick={() => navigate(`/nominations?form_id=${row.id}`)}
+                        className="flex-1 py-2.5 bg-accent-green text-white rounded-xl text-sm font-bold hover:bg-accent-green-hover transition-colors flex items-center justify-center gap-2 min-h-[44px] shadow-sm">
+                        <Award size={14} /> Nominate Teachers
+                      </button>
+                    )}
+
                     {isAdmin && (
                       <button onClick={() => openBuilder(row)}
                         className={`${canFill ? '' : 'flex-1'} py-2.5 px-4 bg-primary/10 text-primary rounded-xl text-sm font-bold hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 min-h-[44px]`}>

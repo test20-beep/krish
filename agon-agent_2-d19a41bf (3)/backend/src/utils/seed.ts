@@ -93,7 +93,7 @@ export const seedData = async (shouldExit = true, clearFirst = true) => {
               { id: "n3", type: "phone", label: "Mobile Number", required: true },
               { id: "n4", type: "date", label: "Date of Birth", required: true },
               { id: "n5", type: "radio", label: "Gender", options: ["Female", "Male", "Non-binary", "Prefer not to say"], required: true },
-              { id: "n6", type: "text", label: "Current Designation" },
+              { id: "n6", type: "text", label: "Current RAJUation" },
               { id: "n7", type: "dropdown", label: "Highest Qualification", options: ["Diploma", "B.Ed", "M.Ed", "M.Phil", "PhD", "Other"], required: true },
               { id: "n8", type: "number", label: "Total Teaching Experience (years)", required: true },
               { id: "n9", type: "textarea", label: "Describe your top 3 pedagogical innovations", required: true, maxLength: 600 },

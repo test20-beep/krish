@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { User } from '../lib/auth';
 import { api } from '../lib/api';
 import DataTable from '../components/DataTable';
@@ -9,6 +9,7 @@ import { UserPlus, Send, Copy, Link2, Upload, RefreshCw, QrCode, MessageSquare }
 
 export default function Nominations({ user }: { user: User }) {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialFormId = parseInt(searchParams.get('form_id') || '0');
   
   const [nominations, setNominations] = useState<any[]>([]);
@@ -28,7 +29,7 @@ export default function Nominations({ user }: { user: User }) {
         api.get(`/nominations?functionary_id=${user.id}`),
         api.get('/forms?status=active')
       ]);
-      setNominations(n); setForms(f.filter((fm: any) => fm.form_type === 'nomination'));
+      setNominations(n); setForms(f);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
   useEffect(() => { fetchData(); }, []);
@@ -52,7 +53,12 @@ export default function Nominations({ user }: { user: User }) {
       teacher_email: addForm.teacher_email, teacher_phone: addForm.teacher_phone,
       school_code: schoolCode, link_type: addForm.link_type
     });
-    setShowAdd(false); setAddForm({ teacher_name: '', teacher_email: '', teacher_phone: '', link_type: 'otp' }); fetchData();
+    setShowAdd(false); setAddForm({ teacher_name: '', teacher_email: '', teacher_phone: '', link_type: 'otp' }); 
+    fetchData();
+    // Redirect back to forms if we came from there
+    if (initialFormId) {
+      setTimeout(() => navigate('/forms'), 1000);
+    }
   };
 
   const handleBulkAdd = async () => {
@@ -63,7 +69,12 @@ export default function Nominations({ user }: { user: User }) {
       return { form_id: selectedForm, functionary_id: user.id, teacher_name: parts[0], teacher_email: parts[1], teacher_phone: parts[2] || '', school_code: schoolCode, link_type: 'otp' };
     });
     await api.post('/nominations', { action: 'bulk-nominate', nominations: nomList });
-    setShowBulk(false); setBulkText(''); fetchData();
+    setShowBulk(false); setBulkText(''); 
+    fetchData();
+    // Redirect back to forms if we came from there
+    if (initialFormId) {
+      setTimeout(() => navigate('/forms'), 1000);
+    }
   };
 
   const resendInvite = async (nom: any) => {
