@@ -20,6 +20,8 @@ export default function Nominations({ user }: { user: User }) {
   const [selectedForm, setSelectedForm] = useState<number>(initialFormId);
   const [addForm, setAddForm] = useState({ teacher_name: '', teacher_email: '', teacher_phone: '', link_type: 'otp' });
   const [bulkText, setBulkText] = useState('');
+  const [selectedNom, setSelectedNom] = useState<any>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   const schoolCode = user.school_code || (user.email?.match(/^head\.([a-z0-9]+)@/i)?.[1]?.toUpperCase()) || '';
 
@@ -51,7 +53,8 @@ export default function Nominations({ user }: { user: User }) {
     await api.post('/nominations', {
       form_id: selectedForm, functionary_id: user.id, teacher_name: addForm.teacher_name,
       teacher_email: addForm.teacher_email, teacher_phone: addForm.teacher_phone,
-      school_code: schoolCode, link_type: addForm.link_type
+      school_code: schoolCode, link_type: addForm.link_type,
+      status: 'pending'
     });
     setShowAdd(false); setAddForm({ teacher_name: '', teacher_email: '', teacher_phone: '', link_type: 'otp' }); 
     fetchData();
@@ -66,7 +69,7 @@ export default function Nominations({ user }: { user: User }) {
     const lines = bulkText.trim().split('\n').filter(l => l.trim());
     const nomList = lines.map(line => {
       const parts = line.split(',').map(p => p.trim());
-      return { form_id: selectedForm, functionary_id: user.id, teacher_name: parts[0], teacher_email: parts[1], teacher_phone: parts[2] || '', school_code: schoolCode, link_type: 'otp' };
+      return { form_id: selectedForm, functionary_id: user.id, teacher_name: parts[0], teacher_email: parts[1], teacher_phone: parts[2] || '', school_code: schoolCode, link_type: 'otp', status: 'pending' };
     });
     await api.post('/nominations', { action: 'bulk-nominate', nominations: nomList });
     setShowBulk(false); setBulkText(''); 
@@ -75,6 +78,12 @@ export default function Nominations({ user }: { user: User }) {
     if (initialFormId) {
       setTimeout(() => navigate('/forms'), 1000);
     }
+  };
+
+  const sendInvite = async (nom: any) => {
+    await api.put('/nominations', { id: nom.id, status: 'invited', invited_at: new Date().toISOString() });
+    alert(`Invitation sent to ${nom.teacher_name}! (simulated)`);
+    fetchData();
   };
 
   const resendInvite = async (nom: any) => {
@@ -87,6 +96,8 @@ export default function Nominations({ user }: { user: User }) {
     const link = `${window.location.origin}/form/fill?token=${nom.unique_token}&sc=${nom.school_code}`;
     navigator.clipboard.writeText(link).then(() => alert('Link copied!'));
   };
+
+  const isAdmin = user.role === 'admin';
 
   const columns = [
     { key: 'teacher_name', label: 'Teacher', sortable: true, render: (v: string, row: any) => (
@@ -133,12 +144,57 @@ export default function Nominations({ user }: { user: User }) {
       })}
 
       <DataTable columns={columns} data={nominations.filter(n => !selectedForm || n.form_id === selectedForm)} loading={loading} searchPlaceholder="Search teachers..."
+        onRowClick={(row) => { setSelectedNom(row); setShowDetails(true); }}
         actions={(row: any) => (
           <div className="flex items-center gap-1">
             <button onClick={e => { e.stopPropagation(); copyLink(row); }} className="p-1.5 rounded-lg hover:bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-primary" title="Copy Link"><Link2 size={14} /></button>
+            {row.status === 'pending' && <button onClick={e => { e.stopPropagation(); sendInvite(row); }} className="p-1.5 rounded-lg hover:bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-green-500" title="Send Invitation"><Send size={14} /></button>}
             {row.status === 'invited' && <button onClick={e => { e.stopPropagation(); resendInvite(row); }} className="p-1.5 rounded-lg hover:bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-amber-500" title="Resend"><RefreshCw size={14} /></button>}
           </div>)}
       />
+
+      {/* Details Modal */}
+      <Modal open={showDetails} onClose={() => setShowDetails(false)} title="Nomination Details">
+        {selectedNom && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold">{selectedNom.teacher_name?.[0]}</div>
+              <div>
+                <h3 className="font-bold text-lg">{selectedNom.teacher_name}</h3>
+                <p className="text-sm text-slate-500">{selectedNom.teacher_email}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Status</p>
+                <StatusBadge status={selectedNom.status} />
+              </div>
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Access Type</p>
+                <p className="text-sm font-semibold capitalize">{selectedNom.link_type}</p>
+              </div>
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">School Code</p>
+                <p className="text-sm font-semibold font-mono">{selectedNom.school_code}</p>
+              </div>
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Invited At</p>
+                <p className="text-sm font-semibold">{selectedNom.invited_at ? new Date(selectedNom.invited_at).toLocaleDateString() : 'Not Invited'}</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={() => setShowDetails(false)} className="px-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:bg-slate-900">Close</button>
+              {selectedNom.status === 'pending' && (
+                <button onClick={() => { sendInvite(selectedNom); setShowDetails(false); }} className="px-6 py-2 bg-primary text-white text-sm rounded-xl font-semibold hover:bg-primary-hover flex items-center gap-2">
+                  <Send size={14} /> Send Invitation
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Add Teacher Modal */}
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add Teacher Nomination">
@@ -149,13 +205,16 @@ export default function Nominations({ user }: { user: User }) {
             <input type="email" value={addForm.teacher_email} onChange={e => setAddForm(p => ({ ...p, teacher_email: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-sm outline-none" placeholder="teacher@email.com" /></div>
           <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">Phone</label>
             <input type="tel" value={addForm.teacher_phone} onChange={e => setAddForm(p => ({ ...p, teacher_phone: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-sm outline-none" placeholder="+91..." /></div>
+          {isAdmin && (
           <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">Access Type</label>
             <select value={addForm.link_type} onChange={e => setAddForm(p => ({ ...p, link_type: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-sm outline-none">
               <option value="otp">OTP Required</option><option value="direct">Direct Link (No Login)</option></select></div>
+          )}
+          {!isAdmin && <input type="hidden" value="otp" onChange={() => {}} />}
           <p className="text-[10px] text-slate-500 dark:text-slate-400">School code <span className="font-bold">{schoolCode}</span> will be auto-attached. Teacher account auto-created if new.</p>
           <div className="flex justify-end gap-3">
             <button onClick={() => setShowAdd(false)} className="px-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:bg-slate-900">Cancel</button>
-            <button onClick={handleAddTeacher} className="px-6 py-2 bg-primary text-white text-sm rounded-xl font-semibold hover:bg-primary-hover">Add & Invite</button>
+            <button onClick={handleAddTeacher} className="px-6 py-2 bg-primary text-white text-sm rounded-xl font-semibold hover:bg-primary-hover">Add Teacher</button>
           </div>
         </div>
       </Modal>
@@ -170,7 +229,7 @@ export default function Nominations({ user }: { user: User }) {
           <textarea value={bulkText} onChange={e => setBulkText(e.target.value)} rows={8} placeholder="Paste CSV data..." className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-sm outline-none font-mono resize-none" />
           <div className="flex justify-end gap-3">
             <button onClick={() => setShowBulk(false)} className="px-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:bg-slate-900">Cancel</button>
-            <button onClick={handleBulkAdd} disabled={!bulkText.trim()} className="px-6 py-2 bg-primary text-white text-sm rounded-xl font-semibold hover:bg-primary-hover disabled:opacity-50">Import & Invite</button>
+            <button onClick={handleBulkAdd} disabled={!bulkText.trim()} className="px-6 py-2 bg-primary text-white text-sm rounded-xl font-semibold hover:bg-primary-hover disabled:opacity-50">Import Teachers</button>
           </div>
         </div>
       </Modal>
