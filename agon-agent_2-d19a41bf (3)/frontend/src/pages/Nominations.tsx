@@ -81,15 +81,25 @@ export default function Nominations({ user }: { user: User }) {
   };
 
   const sendInvite = async (nom: any) => {
-    await api.put('/nominations', { id: nom.id, status: 'invited', invited_at: new Date().toISOString() });
-    alert(`Invitation sent to ${nom.teacher_name}! (simulated)`);
-    fetchData();
+    try {
+      await api.put('/nominations', { id: nom.id, status: 'invited', invited_at: new Date().toISOString() });
+      alert(`Invitation sent to ${nom.teacher_name}! (simulated)`);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to send invitation:', error);
+      alert('Failed to send invitation. Please try again.');
+    }
   };
 
   const resendInvite = async (nom: any) => {
-    await api.put('/nominations', { id: nom.id, reminder_count: (nom.reminder_count || 0) + 1, last_reminder_at: new Date().toISOString() });
-    alert(`Reminder sent to ${nom.teacher_name}! (simulated)`);
-    fetchData();
+    try {
+      await api.put('/nominations', { id: nom.id, reminder_count: (nom.reminder_count || 0) + 1, last_reminder_at: new Date().toISOString() });
+      alert(`Reminder sent to ${nom.teacher_name}! (simulated)`);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to resend invitation:', error);
+      alert('Failed to resend invitation. Please try again.');
+    }
   };
 
   const copyLink = (nom: any) => {
