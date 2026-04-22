@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://abrctezagsdphhmbhgcx.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_A7Bviwd9HmuQm_rp2raRpQ_cqZjrzSD",
+    "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_luRGhWaOKnPCcPfRW9cp6A_Hdk0jgvl",
+    "VITE_SUPABASE_URL": "https://abrctezagsdphhmbhgcx.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "sb_publishable_A7Bviwd9HmuQm_rp2raRpQ_cqZjrzSD",
+    "VITE_GOOGLE_CLIENT_ID": "1065078894672-rmp5kp8vfjns5rn9kp5psfp16g691043.apps.googleusercontent.com",
+
+  }
+}
